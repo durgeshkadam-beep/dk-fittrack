@@ -19,3 +19,10 @@ Phone navigation: **Home, Diet, Workout, Progress, More**.
 Cloud state: `users/{uid}/dkfittrack/state`
 
 Android package: `in.durgeshkadam.fittrack`
+
+
+## v1.2.0 — Android navigation fix
+- Android system navigation bar auto-hides while DK FitTrack is active.
+- Swipe from the bottom/system edge to reveal Android navigation temporarily.
+- Mobile bottom navigation respects safe-area insets.
+- Added viewport-fit=cover for Android WebView and mobile browsers.
