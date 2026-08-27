@@ -1,0 +1,37 @@
+name: Materialize DK FitTrack Web App
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'bootstrap/**'
+      - '.github/workflows/bootstrap-index.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  materialize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Reconstruct web/index.html
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p web
+          cat bootstrap/index.gz.b64.part* | tr -d '\n\r' | base64 -d | gunzip > web/index.html
+          echo "0243b8ae386cd42a48ca137dc8267d9cde37d29f52a13792db2643d38c49d86d  web/index.html" | sha256sum -c -
+      - name: Commit reconstructed app
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add web/index.html
+          if git diff --cached --quiet; then
+            echo "web/index.html already up to date"
+          else
+            git commit -m "Add DK FitTrack modern mobile web app"
+            git push
+          fi
