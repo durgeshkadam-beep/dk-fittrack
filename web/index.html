@@ -119,6 +119,17 @@ canvas{display:block;width:100%;height:auto}
 
 </style>
   <title>DK FitTrack</title>
+<style>
+.food-category-chips{display:flex;gap:8px;overflow-x:auto;padding:12px 1px 5px;scrollbar-width:none}
+.food-category-chips::-webkit-scrollbar{display:none}
+.food-chip{white-space:nowrap;border:1px solid var(--line);background:#fff;color:#475467;padding:8px 12px;border-radius:999px;font-size:12px;font-weight:700;cursor:pointer}
+.food-chip.active{background:var(--dark);color:#fff;border-color:var(--dark)}
+.food-library-meta{display:flex;justify-content:space-between;gap:10px;color:var(--muted);font-size:11px;padding:5px 2px 2px}
+.food-result-meta{min-height:18px;margin-bottom:2px}
+.food-cat{display:inline-flex;font-size:10px;font-weight:800;color:#176447;background:#eaf7f1;border-radius:999px;padding:3px 7px}
+.food-more-note{text-align:center;color:var(--muted);font-size:12px;padding:12px}
+@media(max-width:600px){.food-library-meta{flex-direction:column;gap:2px}.food-category-chips{margin-left:-2px;margin-right:-2px}.food-chip{padding:8px 11px}}
+</style>
 </head>
 <body>
 <div class="mobile-appbar">
@@ -254,9 +265,11 @@ canvas{display:block;width:100%;height:auto}
             <span id="dietDateLabel"></span>
           </div>
           <div class="search-row">
-            <input id="foodSearch" placeholder="Search Indian foods e.g. roti, dal, paneer, chicken..." />
+            <input id="foodSearch" placeholder="Search 250+ Indian foods: roti, bhakri, dal, dosa, biryani..." />
             <button id="addCustomFood" class="btn">＋ Manual food entry</button>
           </div>
+          <div id="foodCategoryChips" class="food-category-chips"></div>
+          <div class="food-library-meta"><span id="foodLibraryCount">Loading food library…</span><span>Typical serving estimates — recipe/oil can change values.</span></div>
           <div class="helper-row">
             <span>Food not found? Enter the label/macros yourself and optionally save it to My Foods.</span>
             <button id="smartMealIdea" class="btn secondary">✨ Smart meal idea</button>
@@ -705,6 +718,7 @@ window.LEANTRACK_FIREBASE = {
 })();
 
 </script>
+<script src="indian-foods.js"></script>
 <script>
 
 const $ = s => document.querySelector(s);
@@ -719,6 +733,7 @@ const defaultState = {
 let state = loadState();
 let activeDate = TODAY();
 let activeWorkout = "A";
+let activeFoodCategory = "All";
 let deferredPrompt = null;
 
 const foods = [
@@ -909,19 +924,51 @@ function renderWeekPlan(){
   $("#weekPlan").innerHTML=days.map((d,i)=>`<div class="week-day"><b>${d}</b><span>${labels[i]} • 35–40 min</span></div>`).join("")+
   `<div class="week-day"><b>Other days</b><span>Walking / recovery • step target</span></div>`;
 }
-function foodCatalog(){ return [...foods,...(state.customFoods||[])]; }
+function foodCatalog(){
+  const all=[...(state.customFoods||[]),...foods,...(window.INDIAN_FOOD_DB||[])];
+  const seen=new Set();
+  return all.filter(x=>{
+    const key=String(x.n||"").trim().toLowerCase();
+    if(!key||seen.has(key)) return false;
+    seen.add(key); return true;
+  });
+}
+function renderFoodCategories(){
+  const holder=$("#foodCategoryChips"); if(!holder) return;
+  const cats=["All","My Foods","Protein & Dairy","Breakfast","Roti & Breads","Rice & Grains","Dal & Pulses","Curries & Sabzi","Maharashtra","South Indian","Non-Veg","Snacks & Street","Fruits","Nuts & Seeds","Drinks","Sweets","Light Meals"];
+  holder.innerHTML=cats.map(cat=>`<button class="food-chip ${activeFoodCategory===cat?'active':''}" onclick="setFoodCategory('${cat.replace(/'/g,"\\'")}')">${cat}</button>`).join("");
+}
+window.setFoodCategory=function(cat){activeFoodCategory=cat;renderFoodCategories();renderFoodResults()}
+
 function renderFoodResults(){
   const q=$("#foodSearch").value.toLowerCase().trim();
   const catalog=foodCatalog();
-  const list=catalog.filter(x=>!q||x.n.toLowerCase().includes(q)).slice(0,30);
+  let list=catalog.filter(x=>{
+    if(activeFoodCategory==="My Foods" && !x.custom) return false;
+    if(activeFoodCategory!=="All" && activeFoodCategory!=="My Foods" && x.cat!==activeFoodCategory) return false;
+    if(!q) return true;
+    const hay=`${x.n||""} ${x.a||""} ${x.cat||""} ${x.q||""}`.toLowerCase();
+    return hay.includes(q);
+  });
+  if(q){
+    list.sort((a,b)=>{
+      const an=String(a.n||"").toLowerCase(), bn=String(b.n||"").toLowerCase();
+      const score=x=>x===q?0:x.startsWith(q)?1:x.includes(q)?2:3;
+      return score(an)-score(bn)||an.localeCompare(bn);
+    });
+  }
+  const total=list.length;
+  list=list.slice(0,60);
+  if($("#foodLibraryCount")) $("#foodLibraryCount").textContent=`${catalog.length}+ foods • ${total} match${total===1?"":"es"}`;
+  renderFoodCategories();
   if(!list.length){
-    $("#foodResults").innerHTML=`<div class="empty-search"><b>No matching food.</b><br>Use <b>Manual food entry</b> and enter nutrition from the packet/recipe. <br><button class="btn" style="margin-top:10px" onclick="openCustomFoodModal()">＋ Add “${$("#foodSearch").value.replace(/"/g,'&quot;')}” manually</button></div>`;
+    $("#foodResults").innerHTML=`<div class="empty-search"><b>No matching food.</b><br>Try another spelling or use <b>Manual food entry</b>.<br><button class="btn" style="margin-top:10px" onclick="openCustomFoodModal()">＋ Add manually</button></div>`;
     return;
   }
   $("#foodResults").innerHTML=list.map((x)=>{
     const idx=catalog.indexOf(x);
-    return `<div class="food-item"><div><h4>${x.n} ${x.custom?'<span class="badge">MY FOOD</span>':''}</h4><p>${x.q} • ${x.cal} kcal • P ${x.p}g • C ${x.c}g • F ${x.f}g</p></div><button class="btn" onclick="openCatalogFoodModal(${idx})">Add</button></div>`
-  }).join("");
+    return `<div class="food-item"><div><div class="food-result-meta">${x.custom?'<span class="badge">MY FOOD</span>':(x.cat?`<span class="food-cat">${x.cat}</span>`:'')}</div><h4>${x.n}</h4><p><b>${x.q}</b> • ${x.cal} kcal • P ${x.p}g • C ${x.c}g • F ${x.f}g</p></div><button class="btn" onclick="openCatalogFoodModal(${idx})">Add</button></div>`;
+  }).join("")+(total>60?`<div class="food-more-note">Showing first 60 results. Type more of the food name to narrow the list.</div>`:"");
 }
 window.openCatalogFoodModal=function(idx){
   const f=foodCatalog()[idx]; openModal("Add food",`
@@ -936,7 +983,7 @@ window.openCatalogFoodModal=function(idx){
 }
 window.openFoodModal=window.openCatalogFoodModal;
 function renderDiet(){
-  renderFoodResults();const t=totals();
+  renderFoodCategories();renderFoodResults();const t=totals();
   $("#dietCalories").textContent=Math.round(t.cal);$("#dietProtein").textContent=Math.round(t.p)+"g";$("#dietCarbs").textContent=Math.round(t.c)+"g";$("#dietFat").textContent=Math.round(t.f)+"g";
   const rem=Math.max(0,state.profile.protein-t.p);
   $("#mealAdvice").innerHTML= rem>25?`You still need about <b>${Math.round(rem)} g protein</b>. Prioritise a lean protein serving in your next meal.`:t.cal>state.profile.calories*1.08?`Calories are above target. Don't compensate aggressively; return to normal portions at the next meal.`:`Good position. Keep the next meal protein-first and portion carbs according to hunger/activity.`;
