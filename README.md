@@ -26,3 +26,12 @@ Android package: `in.durgeshkadam.fittrack`
 - Swipe from the bottom/system edge to reveal Android navigation temporarily.
 - Mobile bottom navigation respects safe-area insets.
 - Added viewport-fit=cover for Android WebView and mobile browsers.
+
+
+## v1.3.0 — Expanded Indian food tracking
+- 250+ common Indian foods with serving calories and protein/carbs/fat.
+- Maharashtra, South Indian, North Indian-style curries, street foods, non-veg, fruits, drinks and sweets.
+- Search aliases such as roti/chapati/phulka, dahi/curd, bhakri, usal, dosa and biryani.
+- Horizontal food-category filters for faster mobile logging.
+- Manual food entry remains available for recipes and packaged foods not in the library.
+- Nutrition values are typical estimates; recipe size and oil can change them.
