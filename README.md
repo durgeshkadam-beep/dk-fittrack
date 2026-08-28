@@ -35,3 +35,11 @@ Android package: `in.durgeshkadam.fittrack`
 - Horizontal food-category filters for faster mobile logging.
 - Manual food entry remains available for recipes and packaged foods not in the library.
 - Nutrition values are typical estimates; recipe size and oil can change them.
+
+
+## v1.2 Indian Food Edition
+- 235+ Indian foods including Maharashtrian, South Indian, North Indian, Gujarati and Bengali foods
+- Category filters and alternate-name search
+- Smart Quick Add: e.g. `2 roti + 1 dal + 100g chicken`
+- Manual entry remains available for recipe/package-specific nutrition
+- Nutrition values are practical estimates; measured portions and package labels take priority
