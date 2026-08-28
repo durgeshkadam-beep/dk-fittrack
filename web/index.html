@@ -118,7 +118,7 @@ canvas{display:block;width:100%;height:auto}
 @media(max-width:420px){.main{padding-left:12px;padding-right:12px}.hero h3{font-size:21px}.metric{min-height:126px;padding:14px}.mobile-bottom-nav{left:7px;right:7px;bottom:max(7px,var(--safe-bottom))}.more-grid{gap:8px}}
 
 </style>
-  <title>DK FitTrack v1.4</title>
+  <title>DK FitTrack v1.5</title>
 <style>
 .food-category-chips{display:flex;gap:8px;overflow-x:auto;padding:12px 1px 5px;scrollbar-width:none}
 .food-category-chips::-webkit-scrollbar{display:none}
@@ -354,7 +354,7 @@ canvas{display:block;width:100%;height:auto}
       <div class="card">
         <div class="section-title"><h3>Exercise library</h3><span>Technique + alternatives</span></div>
         <div class="search-row">
-          <input id="exerciseSearch" placeholder="Search chest, back, squat, dumbbell, home..." />
+          <input id="exerciseSearch" placeholder="Search 200+ movements: chest, squat, yoga, mobility, Pilates, cardio..." />
           <select id="exerciseFilter"><option value="all">All muscles</option><option>Chest</option><option>Back</option><option>Legs</option><option>Shoulders</option><option>Arms</option><option>Core</option><option>Cardio</option></select>
         </div>
         <div id="exerciseLibrary" class="exercise-library"></div>
@@ -1619,6 +1619,6 @@ init();
 })();
 
 </script>
-<script src="smart-quick-add.js"></script>
+<script src="movement-db.js"></script>\n<script src="movement-hub.js"></script>\n<script src="smart-quick-add.js"></script>
 </body>
 </html>
