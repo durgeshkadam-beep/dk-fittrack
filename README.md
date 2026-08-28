@@ -37,9 +37,8 @@ Android package: `in.durgeshkadam.fittrack`
 - Nutrition values are typical estimates; recipe size and oil can change them.
 
 
-## v1.2 Indian Food Edition
-- 235+ Indian foods including Maharashtrian, South Indian, North Indian, Gujarati and Bengali foods
-- Category filters and alternate-name search
-- Smart Quick Add: e.g. `2 roti + 1 dal + 100g chicken`
-- Manual entry remains available for recipe/package-specific nutrition
-- Nutrition values are practical estimates; measured portions and package labels take priority
+## v1.4.0 — Desktop + mobile merged
+- Keeps the newer v1.3 250+ Indian food database and mobile category chips.
+- Adds Smart Quick Add for entries like `2 roti + 1 dal + 100g chicken`.
+- Keeps manual food entry for recipes/package-specific values.
+- Uses the same local-first Firebase sync model across Android and web.
